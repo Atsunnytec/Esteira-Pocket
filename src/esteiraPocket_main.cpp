@@ -78,7 +78,6 @@ void loop()
       break;
     }
 
-    // to do: botao stop nf
     if (STOP.check(true))
     {
       desligaEsteira();
@@ -87,11 +86,27 @@ void loop()
       break;
     }
 
+    if (fsm_substate == fase1)
+    {
+      ligaEsteira();
+      fsm_substate = fase2;
+    }
+    else if (fsm_substate == fase2)
+    {
+      if (SP.check())
+      {
+        timer_atrasoProduto = millis();
+        changeFsmState(ESTADO_CICLO);
+      }
+    }
+
     break;
   }
   case ESTADO_CICLO:
   {
-    static uint32_t timer_esteira = 0;
+    static uint32_t timer_atrasoPistao = 0;
+    static uint32_t timer_saida = 0;
+    static uint32_t timer_duracaoPistao = 0;
     static bool flag_stop = false;
 
     if (evento == EVT_PARADA_EMERGENCIA)
@@ -103,52 +118,65 @@ void loop()
       break;
     }
 
-        // to do: botao stop nf
     if (STOP.check(true))
     {
       flag_stop = true;
-      // to do: na última fase, checa pela flag stop
       Serial.println("STOP");
       break;
     }
 
     if (fsm_substate == fase1)
     {
-      if (millis() - timer_esteira >= 2000)
+      if (millis() - timer_atrasoProduto >= atrasoProduto)
       {
-        ligaEsteira();
-        timer_esteira = millis();
+        desligaEsteira();
+        timer_atrasoPistao = millis();
         fsm_substate = fase2;
       }
     }
     else if (fsm_substate == fase2)
     {
-      if (millis() - timer_esteira >= 2000)
+      if (millis() - timer_atrasoPistao >= atrasoPistao)
       {
-        desligaEsteira();
-        timer_esteira = millis();
-        fsm_substate = fase1;
+        acionaPistao();
+        timer_duracaoPistao = millis();
+        fsm_substate = fase3;
       }
     }
     else if (fsm_substate == fase3)
     {
-      if (millis() - timer_esteira >= 2000)
+      if (millis() - timer_duracaoPistao >= duracaoPistao)
       {
-        timer_esteira = millis();
+        desacionaPistao();
+        timer_saida = millis();
         fsm_substate = fase4;
       }
     }
     else if (fsm_substate == fase4)
     {
-
-      fsm_substate = fase5;
+      if (millis() - timer_duracaoPistao >= duracaoPistao)
+      {
+        desacionaPistao();
+        timer_saida = millis();
+        fsm_substate = fase5;
+      }
     }
     else if (fsm_substate == fase5)
     {
-
-      fsm_substate = fase1;
+      if (millis() - timer_saida >= atrasoSaida)
+      {
+        if (flag_stop)
+        {
+          desligaEsteira();
+          desacionaPistao();
+          changeFsmState(ESTADO_STOP);
+        }
+        else
+        {
+          changeFsmState(ESTADO_EM_FUNCIONAMENTO);
+        }
+      }
     }
-
     break;
   }
   }

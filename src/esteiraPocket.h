@@ -33,6 +33,7 @@ uint16_t fsm_substate = fase1;
 // variaveis:
 bool flag_debugEnabled = true;
 bool flag_bloqueio = false;
+uint32_t timer_atrasoProduto = 0;
 
 // objetos
 extendedIOs extIOs = extendedIOs(PIN_IO_CLOCK, PIN_IO_LATCH, PIN_INPUT_DATA, PIN_OUTPUT_DATA);
@@ -47,10 +48,11 @@ uint32_t diametro = 60;
 uint32_t contador = 0;
 
 // parametros:
-int32_t velocidade = 73; // 0 - 100 %
-int32_t atrasoProduto = 700;
-int32_t atrasoSaida = 700;
-int32_t duracaoPistao = 700; //mm
+int32_t velocidade = 73; // 0 - 100 % // to do:
+int32_t atrasoProduto = 1700;
+int32_t atrasoSaida = 1700;
+int32_t duracaoPistao = 1700; //mm
+int32_t atrasoPistao = 1700; //mm
 
 // prototypes:
 void desligaTodosOutputs();
