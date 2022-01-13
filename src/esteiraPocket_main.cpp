@@ -5,17 +5,12 @@ void setup()
   Serial.begin(115200);
   Serial.println("Detector de Rotulos ready");
 
-  EEPROM.begin(EEPROM_SIZE);
-  loadParametersFromEEPROM();
-  // presetEEPROM();
-
   pinInitialization();
   extIOs.init();
   desligaTodosOutputs();
   enc.setVelocidade(velocidade);
   delay(1000);
 
-  mutex_rs485 = xSemaphoreCreateMutex();
   eventQueue = xQueueCreate(3, sizeof(Evento));
 
   if (flag_debugEnabled)
@@ -23,11 +18,7 @@ void setup()
     xTaskCreatePinnedToCore(t_debug, "debug task", 2048, NULL, PRIORITY_1, NULL, CORE_0);
   }
   xTaskCreatePinnedToCore(t_blink, "blink task", 1024, NULL, PRIORITY_1, NULL, CORE_0);
-  xTaskCreatePinnedToCore(t_ihm, "ihm task", 4096, NULL, PRIORITY_3, NULL, CORE_0);
-  xTaskCreatePinnedToCore(t_botoesIhm, "botoesIhm task", 4096, NULL, PRIORITY_3, &h_botoesIhm, CORE_0);
-  xTaskCreatePinnedToCore(t_eeprom, "eeprom task", 4096, NULL, PRIORITY_3, &h_eeprom, CORE_0);
 
-  ihm.showStatus2msg("SEGURE PLAY");
 }
 
 void loop()
@@ -43,13 +34,10 @@ void loop()
     if (evento == EVT_PLAY_PAUSE)
     {
       changeFsmState(ESTADO_EM_FUNCIONAMENTO);
-      ihm.goToMenu(&menu_monitor);
-      ihm.showStatus2msg("EM FUNCIONAMENTO");
     }
     else if (evento == EVT_HOLD_PLAY_PAUSE)
     {
       changeFsmState(ESTADO_CALIBRACAO);
-      ihm.showStatus2msg("CALIBRACAO");
     }
     break;
   }
@@ -62,7 +50,6 @@ void loop()
     {
       changeFsmState(ESTADO_STOP);
       fsm_bloqueio = fase1; // to do: fragilidade, pode interromper o bloqueio no meio e bugar.
-      ihm.showStatus2msg("STOP");
       break;
     }
 
@@ -173,7 +160,6 @@ void loop()
     if (evento == EVT_PLAY_PAUSE)
     {
       changeFsmState(ESTADO_STOP);
-      ihm.showStatus2msg("STOP");
       break;
     }
 
@@ -240,8 +226,6 @@ void loop()
         Serial.print(tamanhoDoGarrafao);
         Serial.println();
         changeFsmState(ESTADO_EM_FUNCIONAMENTO);
-        ihm.showStatus2msg("EM FUNCIONAMENTO");
-        ihm.goToMenu(&menu_monitor);
         break;
       }
       else

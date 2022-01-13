@@ -35,20 +35,15 @@ enum Estado
   ESTADO_FALHA,
 } fsm;
 uint16_t fsm_substate = fase1;
-uint16_t fsm_bloqueio = fase1;
 
 // variaveis:
 bool flag_debugEnabled = true;
 bool flag_bloqueio = false;
-bool configuracaoPelaIhm = true;
+
 
 // objetos
-ihmSunnytecMaster ihm{protocoloIhm{PIN_RS485_RX, PIN_RS485_TX, PIN_RS485_EN}};
 extendedIOs extIOs = extendedIOs(PIN_IO_CLOCK, PIN_IO_LATCH, PIN_INPUT_DATA, PIN_OUTPUT_DATA);
-SemaphoreHandle_t mutex_rs485;
 QueueHandle_t eventQueue;
-TaskHandle_t h_botoesIhm;
-TaskHandle_t h_eeprom;
 checkSensorPulse sb1 = checkSensorPulse(PIN_SB1);
 checkSensorPulse sb2 = checkSensorPulse(PIN_SB2);
 
@@ -58,13 +53,6 @@ encoderVirtual enc = encoderVirtual(ppr, diametro);
 
 int32_t flag_calibracao = false;
 
-// to do: colocar essas variaveis em FIFOs.
-
-// uint32_t posicaoFimZonaCegaDeEntrada = 0;
-// uint32_t posicaoInicioZonaCegaDeSaida = 0;
-// uint32_t posicaoTamanhoDoGarrafao = 0;
-// uint32_t posicaoDeBloqueio = 0;
-// uint32_t posicaoDeDesbloqueio = 0;
 
 FIFO<uint32_t> posicaoFimZonaCegaDeEntrada = FIFO<uint32_t>(LIMITE_DE_PRODUTOS_NA_LINHA);
 FIFO<uint32_t> posicaoInicioZonaCegaDeSaida = FIFO<uint32_t>(LIMITE_DE_PRODUTOS_NA_LINHA);
@@ -74,46 +62,10 @@ FIFO<uint32_t> posicaoDeDesbloqueio = FIFO<uint32_t>(LIMITE_DE_PRODUTOS_NA_LINHA
 FIFO<bool> noGood = FIFO<bool>(LIMITE_DE_PRODUTOS_NA_LINHA);
 
 // parametros:
-int32_t velocidade = 73; // mm/seg
-int32_t contadorAbsoluto = 0;
-int32_t produto = 0;
-int32_t atrasoBloqueio = 450; //mm
-int32_t duracaoBloqueio = 50; //mm
-int32_t contador = 0;
-int32_t fimZonaCegaDeEntrada = 130;    //mm
-int32_t inicioZonaCegaDeSaida = 220;   //mm
-int32_t tamanhoDoGarrafao = 340;       //mm
-int32_t sombra = 65;                   //mm
-int32_t qtdDeProdutosNaCalibracao = 5; //mm
-int32_t margemDeSeguranca = 10;        //mm
-int32_t ok = 0;
-int32_t nok = 0;
-int32_t status = 0;
-
-// to do: menu monitor: contador:
-// com rotulo:
-// sem rotulo:
-// status:
-
-//menus:
-Menu menu_produto = Menu("Produto", PARAMETRO, &produto, " ", 1u, 0u, (unsigned)(EPR_maxProdutos - 1));
-Menu menu_contador = Menu("Contador", READONLY, &contador, " ");
-Menu menu_duracaoBloqueio = Menu("Duracao Bloqueio", PARAMETRO, &duracaoBloqueio, "mm", 1u, 0u, 10000, &produto);
-Menu menu_atrasoBloqueio = Menu("Atraso Bloqueio", PARAMETRO, &atrasoBloqueio, "mm", 1u, 0u, 10000, &produto);
-Menu menu_fimZonaCegaDeEntrada = Menu("Zona Cega Entrada", PARAMETRO, &fimZonaCegaDeEntrada, "mm", 1u, 20u, 10000, &produto);
-Menu menu_inicioZonaCegaDeSaida = Menu("Zona Cega Saida", PARAMETRO, &inicioZonaCegaDeSaida, "mm", 1u, 20u, 10000, &produto);
-Menu menu_tamanhoDoGarrafao = Menu("Tamanho Garrafao", PARAMETRO, &tamanhoDoGarrafao, "mm", 1u, 50u, 10000, &produto);
-Menu menu_velocidade = Menu("Velocidade", PARAMETRO, &velocidade, "mm/s", 1u, 10u, 1000);                                 // to do: salvar na eeprom
-Menu menu_margemDeSeguranca = Menu("Margem De Seguranca", PARAMETRO, &margemDeSeguranca, "mm", 1u, 0u, 1000);             // to do: salvar na eeprom
-Menu menu_sombra = Menu("Sombra", PARAMETRO, &sombra, "mm", 1u, 0u, 1000);                                                // to do: salvar na eeprom
-Menu menu_qtdProdutosNaCalibracao = Menu("Produtos Na Calib", PARAMETRO, &qtdDeProdutosNaCalibracao, "prod", 1u, 1u, 20); // to do: salvar na eeprom
-
-Menu menu_monitor = Menu("Monitor", MONITOR, &contador);
-Menu menu_ok = Menu("Sem rotulo", READONLY, &ok, " ");
-Menu menu_nok = Menu("Com rotulo", READONLY, &nok, " ");
-Menu menu_status = Menu("STATUS", PARAMETRO_STRING, &status); // to do:
-
-// to do: menus de manutencao
+int32_t velocidade = 73; // 0 - 100 %
+int32_t atrasoProduto = 700;
+int32_t atrasoSaida = 700;
+int32_t duracaoPistao = 700; //mm
 
 // prototypes:
 void desligaTodosOutputs();
@@ -267,242 +219,12 @@ void t_eeprom(void *p)
   }
 }
 
-void saveParametersToEEPROM()
-{
-  EEPROM.put(EPR_produto, produto);
-  EEPROM.put(EPR_margemDeSeguranca, margemDeSeguranca);
-  EEPROM.put(EPR_sombra, sombra);
-  EEPROM.put(EPR_qtdDeProdutosNaCalibracao, qtdDeProdutosNaCalibracao);
-  EEPROM.put(EPR_velocidade, velocidade);
-
-  salvaContadorNaEEPROM();
-
-  saveProdutoToEEPROM(produto);
-
-  EEPROM.commit();
-}
-
-void loadParametersFromEEPROM()
-{
-  EEPROM.get(EPR_contadorAbsoluto, contadorAbsoluto);
-  EEPROM.get(EPR_produto, produto);
-  EEPROM.get(EPR_qtdDeProdutosNaCalibracao, qtdDeProdutosNaCalibracao);
-  EEPROM.get(EPR_margemDeSeguranca, margemDeSeguranca);
-  EEPROM.get(EPR_sombra, sombra);
-  EEPROM.get(EPR_velocidade, velocidade);
-  // EEPROM.get(EPR_rampa, rampa);
-  // EEPROM.get(EPR_velocidadeG0, velocidadeG0);
-  // EEPROM.get(EPR_duracaoPulsoDeImpressao, duracaoPulsoDeImpressao);
-  // EEPROM.get(EPR_limiteEixoX, limiteEixoX);
-  // EEPROM.get(EPR_limiteEixoY, limiteEixoY);
-  // EEPROM.get(EPR_habilitarIntertravamento1, habilitarIntertravamento1);
-  // EEPROM.get(EPR_habilitarIntertravamento2, habilitarIntertravamento2);
-  // EEPROM.get(EPR_habilitarReversao, habilitarReversao);
-  // EEPROM.get(EPR_produtoAvancado, flag_produtoAvancado);
-  // // EEPROM.get(EPR_linhasDeImpressao, linhasDeImpressao);
-  // EEPROM.get(EPR_posicaoDeEmergencia, posicaoDeEmergencia);
-  loadProdutoFromEEPROM();
-}
-
-void loadProdutoFromEEPROM()
-{
-  EEPROM.get(EPR_inicioProdutos + produto * EPR_sizeParameters + sizeof(atrasoBloqueio) * EPR_atrasoBloqueio, atrasoBloqueio);
-  EEPROM.get(EPR_inicioProdutos + produto * EPR_sizeParameters + sizeof(duracaoBloqueio) * EPR_duracaoBloqueio, duracaoBloqueio);
-  EEPROM.get(EPR_inicioProdutos + produto * EPR_sizeParameters + sizeof(fimZonaCegaDeEntrada) * EPR_fimZonaCegaDeEntrada, fimZonaCegaDeEntrada);
-  EEPROM.get(EPR_inicioProdutos + produto * EPR_sizeParameters + sizeof(inicioZonaCegaDeSaida) * EPR_inicioZonaCegaDeSaida, inicioZonaCegaDeSaida);
-  EEPROM.get(EPR_inicioProdutos + produto * EPR_sizeParameters + sizeof(tamanhoDoGarrafao) * EPR_tamanhoDoGarrafao, tamanhoDoGarrafao);
-}
-
-void saveProdutoToEEPROM(int32_t _produto)
-{
-  EEPROM.put(EPR_inicioProdutos + _produto * EPR_sizeParameters + sizeof(atrasoBloqueio) * EPR_atrasoBloqueio, atrasoBloqueio);
-  EEPROM.put(EPR_inicioProdutos + _produto * EPR_sizeParameters + sizeof(duracaoBloqueio) * EPR_duracaoBloqueio, duracaoBloqueio);
-  EEPROM.put(EPR_inicioProdutos + _produto * EPR_sizeParameters + sizeof(fimZonaCegaDeEntrada) * EPR_fimZonaCegaDeEntrada, fimZonaCegaDeEntrada);
-  EEPROM.put(EPR_inicioProdutos + _produto * EPR_sizeParameters + sizeof(inicioZonaCegaDeSaida) * EPR_inicioZonaCegaDeSaida, inicioZonaCegaDeSaida);
-  EEPROM.put(EPR_inicioProdutos + _produto * EPR_sizeParameters + sizeof(tamanhoDoGarrafao) * EPR_tamanhoDoGarrafao, tamanhoDoGarrafao);
-}
-
-void presetEEPROM()
-{
-  for (int i = 0; i < EPR_maxProdutos; i++)
-  {
-    saveProdutoToEEPROM(i);
-  }
-}
-
-void salvaContadorNaEEPROM()
-{
-  const uint16_t intervaloEntreBackups = 100; // ciclos
-  if ((contadorAbsoluto % intervaloEntreBackups) == 0)
-  {
-    // Serial.print("save contador: ");Serial.println(contadorAbsoluto);
-    EEPROM.put(EPR_contadorAbsoluto, contadorAbsoluto);
-  }
-}
-
-void t_ihm(void *p)
-{
-  ihm.configDefaultMsg("      Sunnybot");
-  ihm.configDefaultMsg2((String)contadorAbsoluto);
-  xSemaphoreTake(mutex_rs485, portMAX_DELAY);
-  ihm.setup();
-  ihm.desligaLEDvermelho();
-  ihm.desligaLEDverde();
-  xSemaphoreGive(mutex_rs485);
-
-  delay(3000);
-
-  menu_monitor.setMonitorMenus(&menu_contador, &menu_ok, &menu_nok, &menu_status);
-  liberaMenusDaIhm();
-  ihm.goToMenu(&menu_produto);
-
-  //   atualizaTextoMenuImprimeEixoY();
-  //   menu_testeImpressao.setMsgDefault("PRESSIONE CIMA");
-
-  while (1)
-  {
-    xSemaphoreTake(mutex_rs485, portMAX_DELAY);
-    ihm.checkAndUpdateScreen();
-    xSemaphoreGive(mutex_rs485);
-    delay(100);
-  }
-}
-
-void t_botoesIhm(void *p)
-{
-  delay(4000); // aguarda o objeto ihm ser inicializado
-
-  while (1)
-  {
-    delay(100);
-
-    uint16_t bt = 0;
-
-    xSemaphoreTake(mutex_rs485, portMAX_DELAY);
-    bt = ihm.requestButtons();
-    xSemaphoreGive(mutex_rs485);
-
-    if (bt == TIMEOUT)
-    {
-      Serial.println("timeout ihm");
-    }
-    else if (bt == BOTAO_NENHUM)
-    {
-      // Serial.print("NENHUM...");
-    }
-    else if (bt == BOTAO_PLAY_PAUSE)
-    {
-      enviaEvento(EVT_PLAY_PAUSE);
-      Serial.println("PLAY/PAUSE");
-    }
-    else if (bt == BOTAO_HOLD_PLAY_PAUSE)
-    {
-      enviaEvento(EVT_HOLD_PLAY_PAUSE);
-      Serial.println("HOLD PLAY PAUSE");
-    }
-    else if (configuracaoPelaIhm) // só checa os botoes direcionais se a configuracao estiver liberada.
-    {
-      if (bt == BOTAO_CIMA)
-      {
-        Serial.println("CIMA");
-
-        ihm.incrementaParametroAtual();
-
-        Menu *checkMenu = ihm.getMenu();
-        if (checkMenu == &menu_produto)
-        {
-          // saveProdutoToEEPROM(produto); // to do: salvar produto na eeprom antes de trocar. Tem que ser feito antes de incrementar a variavel
-          loadProdutoFromEEPROM();
-        }
-        else if (checkMenu == &menu_contador)
-        {
-          resetDosContadores();
-        }
-      }
-      else if (bt == BOTAO_ESQUERDA)
-      {
-        Serial.println("ESQUERDA");
-        ihm.goToPreviousMenu();
-      }
-      else if (bt == BOTAO_BAIXO)
-      {
-        Serial.println("BAIXO");
-
-        ihm.decrementaParametroAtual();
-
-        Menu *checkMenu = ihm.getMenu();
-        if (checkMenu == &menu_produto)
-        {
-          loadProdutoFromEEPROM();
-        }
-        else if (checkMenu == &menu_contador)
-        {
-          resetDosContadores();
-        }
-      }
-      else if (bt == BOTAO_DIREITA)
-      {
-        Serial.println("DIREITA");
-        ihm.goToNextMenu();
-      }
-      else if (bt == BOTAO_HOLD_CIMA)
-      {
-        Serial.println("HOLD CIMA");
-      }
-      else if (bt == BOTAO_HOLD_ESQUERDA)
-      {
-        Serial.println("HOLD ESQUERDA");
-      }
-      else if (bt == BOTAO_HOLD_DIREITA)
-      {
-        Serial.println("HOLD DIREITA");
-      }
-      else if (bt == BOTAO_HOLD_BAIXO)
-      {
-        Serial.println("HOLD BAIXO");
-      }
-      else if (bt == BOTAO_HOLD_DIREITA_ESQUERDA)
-      {
-        Serial.println("HOLD DIREITA E ESQUERDA");
-
-        // if (flag_manutencao == false)
-        // {
-        //   liberaMenusDeManutencao();
-        //   ihm.goToMenu(&menu_falhas);
-        //   ihm.showStatus2msg("MANUTENCAO LIBERADA");
-        //   flag_manutencao = true;
-        // }
-      }
-    }
-    else
-    {
-      Serial.print("erro> bt=");
-      Serial.println(bt);
-    }
-  }
-}
 
 void resetDosContadores()
 {
   contador = 0;
   ok = 0;
   nok = 0;
-}
-
-void liberaMenusDaIhm()
-{
-  ihm.addMenuToIndex(&menu_produto);
-  ihm.addMenuToIndex(&menu_atrasoBloqueio);
-  ihm.addMenuToIndex(&menu_duracaoBloqueio);
-  ihm.addMenuToIndex(&menu_fimZonaCegaDeEntrada);
-  ihm.addMenuToIndex(&menu_inicioZonaCegaDeSaida);
-  ihm.addMenuToIndex(&menu_tamanhoDoGarrafao);
-  ihm.addMenuToIndex(&menu_velocidade);
-  ihm.addMenuToIndex(&menu_margemDeSeguranca);
-  ihm.addMenuToIndex(&menu_qtdProdutosNaCalibracao);
-  ihm.addMenuToIndex(&menu_sombra);
-  ihm.addMenuToIndex(&menu_contador);
-  ihm.addMenuToIndex(&menu_monitor);
 }
 
 void desligaTodosOutputs()
