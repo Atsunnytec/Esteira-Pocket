@@ -13,3 +13,6 @@
 [submodule "lib/fifo"]
 	path = lib/fifo
 	url = git@github.com:Atsunnytec/fifo.git
+[submodule "lib/BSPgenereica_v2.1"]
+	path = lib/BSPgenereica_v2.1
+	url = git@github.com:Atsunnytec/BSPgenerica_v2.1.git
