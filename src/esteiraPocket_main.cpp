@@ -18,6 +18,7 @@ void setup()
     xTaskCreatePinnedToCore(t_debug, "debug task", 2048, NULL, PRIORITY_1, NULL, CORE_0);
   }
   xTaskCreatePinnedToCore(t_blink, "blink task", 1024, NULL, PRIORITY_1, NULL, CORE_0);
+  xTaskCreatePinnedToCore(t_emergencia, "emergencia task", 1024, NULL, PRIORITY_2, NULL, CORE_0);
 }
 
 void loop()
@@ -28,18 +29,52 @@ void loop()
   {
   case ESTADO_EMERGENCIA:
   {
-    if (START.check())
+    static uint32_t timer_emergencia = 0;
+    const uint32_t timeout_emergencia = 250;
+
+    if (fsm_substate == fase1)
     {
+      timer_emergencia = millis();
+      fsm_substate = fase2;
+    }
+    else if (fsm_substate == fase2)
+    {
+      if (evento == EVT_PARADA_EMERGENCIA)
+      {
+        timer_emergencia = millis();
+      }
+      else if (millis() - timer_emergencia > timeout_emergencia)
+      {
+        Serial.println("STOP");
+        changeFsmState(ESTADO_STOP);
+      }
+    }
+    break;
+  }
+  case ESTADO_STOP:
+  {
+    if (evento == EVT_PARADA_EMERGENCIA)
+    {
+      desligaEsteira();
+      changeFsmState(ESTADO_EMERGENCIA);
+      Serial.println("EMERGENCIA");
+      break;
+    }
+
+    if(START.check())
+    {
+      Serial.println("EM FUNCIONAMENTO");
       changeFsmState(ESTADO_EM_FUNCIONAMENTO);
     }
     break;
   }
   case ESTADO_EM_FUNCIONAMENTO:
   {
-    if(evento == EVT_PARADA_EMERGENCIA)
+    if (evento == EVT_PARADA_EMERGENCIA)
     {
       desligaEsteira();
       changeFsmState(ESTADO_EMERGENCIA);
+      Serial.println("EMERGENCIA");
       break;
     }
 
@@ -93,6 +128,15 @@ void loop()
   }
   case ESTADO_CICLO:
   {
+    if (evento == EVT_PARADA_EMERGENCIA)
+    {
+      desligaEsteira();
+      desacionaPistao();
+      changeFsmState(ESTADO_EMERGENCIA);
+      Serial.println("EMERGENCIA");
+      break;
+    }
+
     break;
   }
   }

@@ -24,16 +24,15 @@ enum Evento
 enum Estado
 {
   ESTADO_EMERGENCIA,
-  ESTADO_CICLO,
+  ESTADO_STOP,
   ESTADO_EM_FUNCIONAMENTO,
+  ESTADO_CICLO,
 } fsm;
 uint16_t fsm_substate = fase1;
 
 // variaveis:
 bool flag_debugEnabled = true;
 bool flag_bloqueio = false;
-
-
 
 // objetos
 extendedIOs extIOs = extendedIOs(PIN_IO_CLOCK, PIN_IO_LATCH, PIN_INPUT_DATA, PIN_OUTPUT_DATA);
@@ -152,6 +151,23 @@ void t_debug(void *p)
     // }
 
     Serial.println();
+  }
+}
+
+void t_emergencia(void *p)
+{
+  unsigned int interval = 200;
+
+  while (1)
+  {
+    delay(interval);
+
+    extIOs.updateInputState();
+    if (extIOs.checkInputState(PIN_EMERGENCIA) == LOW)
+    {
+      enviaEvento(EVT_PARADA_EMERGENCIA);
+      // Serial.println("envia evt: emg");
+    }
   }
 }
 
