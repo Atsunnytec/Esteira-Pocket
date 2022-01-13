@@ -1,0 +1,15 @@
+[submodule "lib/ihmSunnytecMaster_v2.0"]
+	path = lib/ihmSunnytecMaster_v2.0
+	url = git@github.com:Atsunnytec/ihmSunnytecMaster_v2.0.git
+[submodule "lib/BSPgenerica_v2.1"]
+	path = lib/BSPgenerica_v2.1
+	url = git@github.com:Atsunnytec/BSPgenerica_v2.1.git
+[submodule "lib/extendedIOs"]
+	path = lib/extendedIOs
+	url = git@github.com:Atsunnytec/extendedIOs.git
+[submodule "lib/encoderVirtual"]
+	path = lib/encoderVirtual
+	url = git@github.com:Atsunnytec/encoderVirtual.git
+[submodule "lib/fifo"]
+	path = lib/fifo
+	url = git@github.com:Atsunnytec/fifo.git
