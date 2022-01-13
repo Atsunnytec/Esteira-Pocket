@@ -44,22 +44,15 @@ bool flag_bloqueio = false;
 // objetos
 extendedIOs extIOs = extendedIOs(PIN_IO_CLOCK, PIN_IO_LATCH, PIN_INPUT_DATA, PIN_OUTPUT_DATA);
 QueueHandle_t eventQueue;
-checkSensorPulse sb1 = checkSensorPulse(PIN_SB1);
-checkSensorPulse sb2 = checkSensorPulse(PIN_SB2);
+checkSensorPulse SP = checkSensorPulse(PIN_SP);
+checkSensorPulse START = checkSensorPulse(PIN_START);
+checkSensorPulse STOP = checkSensorPulse(PIN_STOP);
 
 uint32_t ppr = 2000;
 uint32_t diametro = 60;
 encoderVirtual enc = encoderVirtual(ppr, diametro);
 
-int32_t flag_calibracao = false;
-
-
-FIFO<uint32_t> posicaoFimZonaCegaDeEntrada = FIFO<uint32_t>(LIMITE_DE_PRODUTOS_NA_LINHA);
-FIFO<uint32_t> posicaoInicioZonaCegaDeSaida = FIFO<uint32_t>(LIMITE_DE_PRODUTOS_NA_LINHA);
-FIFO<uint32_t> posicaoTamanhoDoGarrafao = FIFO<uint32_t>(LIMITE_DE_PRODUTOS_NA_LINHA);
-FIFO<uint32_t> posicaoDeBloqueio = FIFO<uint32_t>(LIMITE_DE_PRODUTOS_NA_LINHA);
-FIFO<uint32_t> posicaoDeDesbloqueio = FIFO<uint32_t>(LIMITE_DE_PRODUTOS_NA_LINHA);
-FIFO<bool> noGood = FIFO<bool>(LIMITE_DE_PRODUTOS_NA_LINHA);
+uint32_t contador = 0;
 
 // parametros:
 int32_t velocidade = 73; // 0 - 100 %
@@ -69,19 +62,11 @@ int32_t duracaoPistao = 700; //mm
 
 // prototypes:
 void desligaTodosOutputs();
-void liberaMenusDaIhm();
 Evento recebeEventos();
 void enviaEvento(Evento event);
 void changeFsmState(Estado estado);
-void saveParametersToEEPROM();
-void salvaContadorNaEEPROM();
-void loadParametersFromEEPROM();
-void presetEEPROM();
-void saveProdutoToEEPROM(int32_t _produto);
-void loadProdutoFromEEPROM();
 void acionaPistao();
 void desacionaPistao();
-void taskBloqueio();
 void taskSensores();
 int32_t maximo(int32_t *, int16_t);
 int32_t minimo(int32_t *, int16_t);
@@ -89,82 +74,12 @@ void incrementaContadores();
 void resetDosContadores();
 void colocaNovoGarrafaoNaFila();
 
-// functions:
-void taskBloqueio()
-{
-  if (fsm_bloqueio == fase1)
-  {
-    if (enc.compareDistance(posicaoDeBloqueio.peek()))
-    {
-      posicaoDeBloqueio.pop();
-      if (noGood.peek() == true)
-      {
-        Serial.print(enc.getPosition());
-        Serial.println(" bloqueia");
-        acionaPistao();
-      }
-      fsm_bloqueio = fase2;
-    }
-  }
-  else if (fsm_bloqueio == fase2)
-  {
-    if (enc.compareDistance(posicaoDeDesbloqueio.peek()))
-    {
-      posicaoDeDesbloqueio.pop();
-      noGood.pop();
-      Serial.print(enc.getPosition());
-      Serial.println(" desbloqueia");
-      desacionaPistao();
-      fsm_bloqueio = fase1; // to do: resetar para fase 1 quando o ciclo der pause
-    }
-  }
-}
-
 void incrementaContadores()
 {
   contador++;
-  contadorAbsoluto++;
 }
 
-void colocaNovoGarrafaoNaFila()
-{
-  uint32_t posicaoGarrafao = enc.getPosition();
-  posicaoFimZonaCegaDeEntrada.push(posicaoGarrafao + fimZonaCegaDeEntrada);
-  posicaoInicioZonaCegaDeSaida.push(posicaoGarrafao + inicioZonaCegaDeSaida);
-  posicaoTamanhoDoGarrafao.push(posicaoGarrafao + tamanhoDoGarrafao + sombra);
-  posicaoDeBloqueio.push(posicaoTamanhoDoGarrafao.peek() + atrasoBloqueio);
-  posicaoDeDesbloqueio.push(posicaoDeBloqueio.peek() + duracaoBloqueio);
-}
 
-int32_t maximo(int32_t *data, int16_t size)
-{
-  int32_t max = data[0];
-
-  for (int i = 1; i < size; i++)
-  {
-    if (data[i] > max)
-    {
-      max = data[i];
-    }
-  }
-
-  return max;
-}
-
-int32_t minimo(int32_t *data, int16_t size)
-{
-  int32_t min = data[0];
-
-  for (int i = 1; i < size; i++)
-  {
-    if (data[i] < min)
-    {
-      min = data[i];
-    }
-  }
-
-  return min;
-}
 
 void taskSensores()
 {
@@ -206,25 +121,6 @@ void enviaEvento(Evento event)
     Serial.println(event);
   }
   // Serial.print("enviou evento: "); Serial.println(event);
-}
-
-void t_eeprom(void *p)
-{
-  int16_t intervaloDeBackups = 10000; //ms
-
-  while (1)
-  {
-    delay(intervaloDeBackups);
-    saveParametersToEEPROM();
-  }
-}
-
-
-void resetDosContadores()
-{
-  contador = 0;
-  ok = 0;
-  nok = 0;
 }
 
 void desligaTodosOutputs()

@@ -3,7 +3,7 @@
 void setup()
 {
   Serial.begin(115200);
-  Serial.println("Detector de Rotulos ready");
+  Serial.println("Esteira Pocket ready");
 
   pinInitialization();
   extIOs.init();
@@ -25,8 +25,6 @@ void loop()
 {
   Evento evento = recebeEventos();
 
-  // to do: rotina que reseta o encoder se o buffer ficar vazio.
-
   switch (fsm)
   {
   case ESTADO_STOP:
@@ -43,8 +41,6 @@ void loop()
   }
   case ESTADO_EM_FUNCIONAMENTO:
   {
-    // to do: task que controla a rejeicao aqui no "em funcionamento"
-    // to do: timeout para o ciclo. Se calibrar errado o ciclo pode ficar infinito.
 
     if (evento == EVT_PLAY_PAUSE)
     {
