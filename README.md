@@ -1,3 +1,3 @@
-# detectorDeRotulos
+# esteira pocket
 
-Firmware do detector de rótulos para a placa Industrial Genérica v2.1. O Detector de rótulos é um equipamento que trabalha em conjunto com o aplicador de etiquetas.
+Firmware da esteira pocket para a placa Industrial Genérica v2.1. A esteira pocket foi desenvolvida para a Clamper. Ela transporta os pockets, para eles na posição, e fecha-os utilizando um pistão.
