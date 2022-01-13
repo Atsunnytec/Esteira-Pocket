@@ -61,7 +61,7 @@ void loop()
       break;
     }
 
-    if(START.check())
+    if (START.check())
     {
       Serial.println("EM FUNCIONAMENTO");
       changeFsmState(ESTADO_EM_FUNCIONAMENTO);
@@ -79,14 +79,38 @@ void loop()
     }
 
     // to do: botao stop nf
-    if (START.check())
+    if (STOP.check(true))
     {
       desligaEsteira();
       changeFsmState(ESTADO_EMERGENCIA);
+      Serial.println("STOP");
       break;
     }
 
+    break;
+  }
+  case ESTADO_CICLO:
+  {
     static uint32_t timer_esteira = 0;
+    static bool flag_stop = false;
+
+    if (evento == EVT_PARADA_EMERGENCIA)
+    {
+      desligaEsteira();
+      desacionaPistao();
+      changeFsmState(ESTADO_EMERGENCIA);
+      Serial.println("EMERGENCIA");
+      break;
+    }
+
+        // to do: botao stop nf
+    if (STOP.check(true))
+    {
+      flag_stop = true;
+      // to do: na última fase, checa pela flag stop
+      Serial.println("STOP");
+      break;
+    }
 
     if (fsm_substate == fase1)
     {
@@ -123,18 +147,6 @@ void loop()
     {
 
       fsm_substate = fase1;
-    }
-    break;
-  }
-  case ESTADO_CICLO:
-  {
-    if (evento == EVT_PARADA_EMERGENCIA)
-    {
-      desligaEsteira();
-      desacionaPistao();
-      changeFsmState(ESTADO_EMERGENCIA);
-      Serial.println("EMERGENCIA");
-      break;
     }
 
     break;
