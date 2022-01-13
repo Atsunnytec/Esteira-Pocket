@@ -1,7 +1,6 @@
 #ifndef defines_h
 #define defines_h
 
-
 // IO's:
 #define PIN_SP PIN_HSDI1  // sensor de produto
 #define PIN_START PIN_DI1

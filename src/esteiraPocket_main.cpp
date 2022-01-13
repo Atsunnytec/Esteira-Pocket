@@ -8,10 +8,9 @@ void setup()
   pinInitialization();
   extIOs.init();
   desligaTodosOutputs();
-  enc.setVelocidade(velocidade);
   delay(1000);
 
-  eventQueue = xQueueCreate(3, sizeof(Evento));
+  eventQueue = xQueueCreate(2, sizeof(Evento));
 
   if (flag_debugEnabled)
   {

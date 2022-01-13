@@ -5,12 +5,7 @@
 #include <HardwareSerial.h>
 #include <extendedIOs.h>
 #include <esp32Industrial_v2.1.h>
-#include <ihmSunnytecMaster_v2.0.h>
-#include <protocoloIhm_v2.0.h>
-#include <EEPROM.h>
 #include <checkSensorPulse.h>
-#include <encoderVirtual.h>
-#include <fifo.h>
 #include "defines.h"
 
 enum Evento
@@ -47,7 +42,6 @@ checkSensorPulse STOP = checkSensorPulse(PIN_STOP);
 
 uint32_t ppr = 2000;
 uint32_t diametro = 60;
-encoderVirtual enc = encoderVirtual(ppr, diametro);
 
 uint32_t contador = 0;
 
@@ -78,7 +72,6 @@ void incrementaContadores()
 
 void taskSensores()
 {
-
   enviaEvento(EVT_SENSOR);
 }
 
