@@ -23,10 +23,12 @@
 
 // IO's:
 #define PIN_SP PIN_HSDI1
-#define PIN_SB1 PIN_HSDI2
-#define PIN_SB2 PIN_HSDI3
+#define PIN_START PIN_DI1
+#define PIN_STOP PIN_DI2
+#define PIN_EMERGENCIA DI3
 
-#define PIN_BLOQUEIO RLO1
+#define PIN_PISTAO PIN_DO1
+#define PIN_MOTOR PIN_HSDO1
 
 // outros:
 #define LIMITE_DE_PRODUTOS_NA_LINHA 4
