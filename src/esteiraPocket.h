@@ -23,7 +23,7 @@ enum Evento
 
 enum Estado
 {
-  ESTADO_STOP,
+  ESTADO_EMERGENCIA,
   ESTADO_CICLO,
   ESTADO_EM_FUNCIONAMENTO,
 } fsm;
@@ -32,6 +32,8 @@ uint16_t fsm_substate = fase1;
 // variaveis:
 bool flag_debugEnabled = true;
 bool flag_bloqueio = false;
+
+
 
 // objetos
 extendedIOs extIOs = extendedIOs(PIN_IO_CLOCK, PIN_IO_LATCH, PIN_INPUT_DATA, PIN_OUTPUT_DATA);
@@ -54,6 +56,8 @@ int32_t duracaoPistao = 700; //mm
 // prototypes:
 void desligaTodosOutputs();
 Evento recebeEventos();
+void ligaEsteira();
+void desligaEsteira();
 void enviaEvento(Evento event);
 void changeFsmState(Estado estado);
 void acionaPistao();
@@ -83,6 +87,16 @@ void acionaPistao()
 void desacionaPistao()
 {
   digitalWrite(PIN_PISTAO, LOW);
+}
+
+void ligaEsteira()
+{
+  digitalWrite(PIN_MOTOR, LOW);
+}
+
+void desligaEsteira()
+{
+  digitalWrite(PIN_MOTOR, HIGH);
 }
 
 void changeFsmState(Estado estado)

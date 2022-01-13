@@ -8,6 +8,7 @@ void setup()
   pinInitialization();
   extIOs.init();
   desligaTodosOutputs();
+  desligaEsteira();
   delay(1000);
 
   eventQueue = xQueueCreate(2, sizeof(Evento));
@@ -25,9 +26,9 @@ void loop()
 
   switch (fsm)
   {
-  case ESTADO_STOP:
+  case ESTADO_EMERGENCIA:
   {
-    if (evento == EVT_PLAY_PAUSE)
+    if (START.check())
     {
       changeFsmState(ESTADO_EM_FUNCIONAMENTO);
     }
@@ -35,27 +36,48 @@ void loop()
   }
   case ESTADO_EM_FUNCIONAMENTO:
   {
-
-    if (evento == EVT_PLAY_PAUSE)
+    if(evento == EVT_PARADA_EMERGENCIA)
     {
-      changeFsmState(ESTADO_STOP);
+      desligaEsteira();
+      changeFsmState(ESTADO_EMERGENCIA);
       break;
     }
 
+    // to do: botao stop nf
+    if (START.check())
+    {
+      desligaEsteira();
+      changeFsmState(ESTADO_EMERGENCIA);
+      break;
+    }
+
+    static uint32_t timer_esteira = 0;
+
     if (fsm_substate == fase1)
     {
-      if (evento == EVT_SENSOR)
+      if (millis() - timer_esteira >= 2000)
       {
+        ligaEsteira();
+        timer_esteira = millis();
         fsm_substate = fase2;
       }
     }
     else if (fsm_substate == fase2)
     {
-      fsm_substate = fase3;
+      if (millis() - timer_esteira >= 2000)
+      {
+        desligaEsteira();
+        timer_esteira = millis();
+        fsm_substate = fase1;
+      }
     }
     else if (fsm_substate == fase3)
     {
-      fsm_substate = fase4;
+      if (millis() - timer_esteira >= 2000)
+      {
+        timer_esteira = millis();
+        fsm_substate = fase4;
+      }
     }
     else if (fsm_substate == fase4)
     {
