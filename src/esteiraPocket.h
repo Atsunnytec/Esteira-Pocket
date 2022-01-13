@@ -79,8 +79,8 @@ void loadParametersFromEEPROM();
 void presetEEPROM();
 void saveProdutoToEEPROM(int32_t _produto);
 void loadProdutoFromEEPROM();
-void bloqueiaAES();
-void desbloqueiaAES();
+void acionaPistao();
+void desacionaPistao();
 void taskBloqueio();
 void taskSensores();
 int32_t maximo(int32_t *, int16_t);
@@ -101,7 +101,7 @@ void taskBloqueio()
       {
         Serial.print(enc.getPosition());
         Serial.println(" bloqueia");
-        bloqueiaAES();
+        acionaPistao();
       }
       fsm_bloqueio = fase2;
     }
@@ -114,7 +114,7 @@ void taskBloqueio()
       noGood.pop();
       Serial.print(enc.getPosition());
       Serial.println(" desbloqueia");
-      desbloqueiaAES();
+      desacionaPistao();
       fsm_bloqueio = fase1; // to do: resetar para fase 1 quando o ciclo der pause
     }
   }
@@ -175,14 +175,14 @@ void taskSensores()
   }
 }
 
-void bloqueiaAES()
+void acionaPistao()
 {
-  extIOs.desligaOutput(PIN_BLOQUEIO);
+  digitalWrite(PIN_PISTAO, HIGH);
 }
 
-void desbloqueiaAES()
+void desacionaPistao()
 {
-  extIOs.ligaOutput(PIN_BLOQUEIO);
+  digitalWrite(PIN_PISTAO, LOW);
 }
 
 void changeFsmState(Estado estado)
