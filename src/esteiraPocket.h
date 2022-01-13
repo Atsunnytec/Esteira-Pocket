@@ -29,17 +29,14 @@ enum Evento
 enum Estado
 {
   ESTADO_STOP,
-  ESTADO_CALIBRACAO,
+  ESTADO_CICLO,
   ESTADO_EM_FUNCIONAMENTO,
-  ESTADO_TESTE_VELOCIDADE,
-  ESTADO_FALHA,
 } fsm;
 uint16_t fsm_substate = fase1;
 
 // variaveis:
 bool flag_debugEnabled = true;
 bool flag_bloqueio = false;
-
 
 // objetos
 extendedIOs extIOs = extendedIOs(PIN_IO_CLOCK, PIN_IO_LATCH, PIN_INPUT_DATA, PIN_OUTPUT_DATA);
@@ -79,15 +76,10 @@ void incrementaContadores()
   contador++;
 }
 
-
-
 void taskSensores()
 {
-  // if (sb2.check() || sb1.check())
-  if (sb2.onChange() || sb1.onChange())
-  {
-    enviaEvento(EVT_SENSOR);
-  }
+
+  enviaEvento(EVT_SENSOR);
 }
 
 void acionaPistao()
