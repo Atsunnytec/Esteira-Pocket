@@ -12,7 +12,7 @@ void setup()
 
   esteira.setup(velocidade, rampa);
   desligaEsteira();
-  
+
   eventQueue = xQueueCreate(2, sizeof(Evento));
 
   if (flag_debugEnabled)
@@ -21,16 +21,11 @@ void setup()
   }
   xTaskCreatePinnedToCore(t_blink, "blink task", 1024, NULL, PRIORITY_1, NULL, CORE_0);
   xTaskCreatePinnedToCore(t_emergencia, "emergencia task", 1024, NULL, PRIORITY_2, NULL, CORE_0);
-
-  // esteira.setup(velocidade, rampa); //velocidade de 0 a 100%;
-
 }
 
 void loop()
 {
   Evento evento = recebeEventos();
-
-  esteira.controller();
 
   switch (fsm)
   {

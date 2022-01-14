@@ -65,7 +65,7 @@ public:
         {
             int32_t v = map(_velocidade / 100, 0, 255, _limiteDaVelocidadeEmBits, 0);
             ledcWrite(pwmChannel, v);
-            Serial.println(v);
+            // Serial.println(v);
         }
     }
 
@@ -86,10 +86,22 @@ public:
 
     void aceleraEsteira()
     {
-        while (_velocidade < _velocidade_max / 100)
+        while (_velocidade < _velocidade_max)
         {
             _velocidade += dV;
-            ledcWrite(pwmChannel, _velocidade);
+            int32_t v = map(_velocidade / 100, 0, 255, _limiteDaVelocidadeEmBits, 0);
+            ledcWrite(pwmChannel, v);
+            delay(dt);
+        }
+    }
+
+    void desaceleraEsteira()
+    {
+        while (_velocidade > 0)
+        {
+            _velocidade -= dV;
+            int32_t v = map(_velocidade / 100, 0, 255, _limiteDaVelocidadeEmBits, 0);
+            ledcWrite(pwmChannel, v);
             delay(dt);
         }
     }
