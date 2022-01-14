@@ -97,6 +97,7 @@ void loop()
     {
       if (SP.check())
       {
+        Serial.println("produto detectado.");
         timer_atrasoProduto = millis();
         changeFsmState(ESTADO_CICLO);
       }
@@ -140,6 +141,7 @@ void loop()
     {
       if (millis() - timer_atrasoPistao >= atrasoPistao)
       {
+        Serial.println("aciona pistao");
         acionaPistao();
         timer_duracaoPistao = millis();
         fsm_substate = fase3;
@@ -149,21 +151,13 @@ void loop()
     {
       if (millis() - timer_duracaoPistao >= duracaoPistao)
       {
+        Serial.println("desaciona pistao");
         desacionaPistao();
         timer_saida = millis();
         fsm_substate = fase4;
       }
     }
     else if (fsm_substate == fase4)
-    {
-      if (millis() - timer_duracaoPistao >= duracaoPistao)
-      {
-        desacionaPistao();
-        timer_saida = millis();
-        fsm_substate = fase5;
-      }
-    }
-    else if (fsm_substate == fase5)
     {
       if (millis() - timer_saida >= atrasoSaida)
       {
