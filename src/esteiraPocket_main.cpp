@@ -8,9 +8,11 @@ void setup()
   pinInitialization();
   extIOs.init();
   desligaTodosOutputs();
-  desligaEsteira();
   delay(1000);
 
+  esteira.setup(velocidade, rampa);
+  desligaEsteira();
+  
   eventQueue = xQueueCreate(2, sizeof(Evento));
 
   if (flag_debugEnabled)
@@ -22,7 +24,6 @@ void setup()
 
   // esteira.setup(velocidade, rampa); //velocidade de 0 a 100%;
 
-  esteira.setup(velocidade, rampa);
 }
 
 void loop()

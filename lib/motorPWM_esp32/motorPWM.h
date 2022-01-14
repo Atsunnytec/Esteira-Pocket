@@ -53,7 +53,7 @@ public:
     {
         if (calculaVelocidade())
         {
-            int32_t v = map(_velocidade/100, 0, 255, 0, 1024);
+            int32_t v = map(_velocidade/100, 0, 255, 1024, 0);
             ledcWrite(pwmChannel, v);
             Serial.println (v);
         }
@@ -72,6 +72,15 @@ public:
     unsigned long position()
     {
         return _pos / 10000;
+    }
+
+    void aceleraEsteira()
+    {
+        while(_velocidade < _velocidade_max)
+        {
+            _velocidade += dV;
+            delay(dt);
+        }
     }
 
 private:
@@ -120,7 +129,7 @@ private:
             {
                 if (_velocidade > 0)
                 {
-                    _velocidade = 0;
+                    _velocidade -= dV;
                     _velocidade = constrain(_velocidade, 0, _velocidade_max);
                     _velocidade_emMm = _velocidadeMax_emMm * 10 / 100 * _velocidade / tamanhoUmByte;
                     return true;

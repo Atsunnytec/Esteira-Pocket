@@ -50,8 +50,8 @@ uint32_t diametro = 60;
 uint32_t contador = 0;
 
 // parametros:
-int32_t velocidade = 100;      // 0 - 100 % // to do:
-int32_t rampa = 2000;          // ms
+int32_t velocidade = 100;     // 0 - 100 % // to do:
+int32_t rampa = 2000;         // ms
 int32_t atrasoProduto = 1700; //ms
 int32_t atrasoSaida = 1700;   // ms
 int32_t duracaoPistao = 1700; //ms
@@ -95,12 +95,12 @@ void desacionaPistao()
 
 void ligaEsteira()
 {
-  esteira.stop();
+  esteira.run();
 }
 
 void desligaEsteira()
 {
-  esteira.run();
+  esteira.stop();
 }
 
 void changeFsmState(Estado estado)
