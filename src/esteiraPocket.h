@@ -6,6 +6,7 @@
 #include <extendedIOs.h>
 #include <esp32Industrial_v2.1.h>
 #include <checkSensorPulse.h>
+#include <motorPWM.h>
 #include "defines.h"
 
 enum Evento
@@ -41,6 +42,7 @@ QueueHandle_t eventQueue;
 checkSensorPulse SP = checkSensorPulse(PIN_SP);
 checkSensorPulse START = checkSensorPulse(PIN_START);
 checkSensorPulse STOP = checkSensorPulse(PIN_STOP);
+motorPWM esteira = motorPWM(PIN_MOTOR);
 
 uint32_t ppr = 2000;
 uint32_t diametro = 60;
@@ -48,11 +50,12 @@ uint32_t diametro = 60;
 uint32_t contador = 0;
 
 // parametros:
-int32_t velocidade = 73; // 0 - 100 % // to do:
-int32_t atrasoProduto = 1700;
-int32_t atrasoSaida = 1700;
-int32_t duracaoPistao = 1700; //mm
-int32_t atrasoPistao = 1700; //mm
+int32_t velocidade = 100;      // 0 - 100 % // to do:
+int32_t rampa = 2000;          // ms
+int32_t atrasoProduto = 1700; //ms
+int32_t atrasoSaida = 1700;   // ms
+int32_t duracaoPistao = 1700; //ms
+int32_t atrasoPistao = 1700;  //ms
 
 // prototypes:
 void desligaTodosOutputs();
@@ -92,12 +95,12 @@ void desacionaPistao()
 
 void ligaEsteira()
 {
-  digitalWrite(PIN_MOTOR, LOW);
+  esteira.stop();
 }
 
 void desligaEsteira()
 {
-  digitalWrite(PIN_MOTOR, HIGH);
+  esteira.run();
 }
 
 void changeFsmState(Estado estado)
