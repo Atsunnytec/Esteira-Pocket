@@ -63,7 +63,7 @@ public:
     {
         if (calculaVelocidade())
         {
-            int32_t v = map(_velocidade / 100, 0, 255, _limiteDaVelocidadeEmBits, 0);
+            int32_t v = map(_velocidade / 100, 0, tamanhoUmByte, _limiteDaVelocidadeEmBits, 0);
             ledcWrite(pwmChannel, v);
             // Serial.println(v);
         }
@@ -89,7 +89,7 @@ public:
         while (_velocidade < _velocidade_max)
         {
             _velocidade += dV;
-            int32_t v = map(_velocidade / 100, 0, 255, _limiteDaVelocidadeEmBits, 0);
+            int32_t v = map(_velocidade / 100, 0, tamanhoUmByte, _limiteDaVelocidadeEmBits, 0);
             ledcWrite(pwmChannel, v);
             delay(dt);
         }
@@ -100,7 +100,7 @@ public:
         while (_velocidade > 0)
         {
             _velocidade -= dV;
-            int32_t v = map(_velocidade / 100, 0, 255, _limiteDaVelocidadeEmBits, 0);
+            int32_t v = map(_velocidade / 100, 0, tamanhoUmByte, _limiteDaVelocidadeEmBits, 0);
             ledcWrite(pwmChannel, v);
             delay(dt);
         }

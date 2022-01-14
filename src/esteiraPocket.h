@@ -78,11 +78,6 @@ void incrementaContadores()
   contador++;
 }
 
-void taskSensores()
-{
-  enviaEvento(EVT_SENSOR);
-}
-
 void acionaPistao()
 {
   digitalWrite(PIN_PISTAO, HIGH);
@@ -95,13 +90,11 @@ void desacionaPistao()
 
 void ligaEsteira()
 {
-  // esteira.run();
   esteira.aceleraEsteira();
 }
 
 void desligaEsteira()
 {
-  // esteira.stop();
   esteira.desaceleraEsteira();
 }
 
