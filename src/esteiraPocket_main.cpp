@@ -97,6 +97,7 @@ void loop()
     {
       if (SP.check())
       {
+        timer_fechamento = millis();
         Serial.println("produto detectado.");
         timer_atrasoProduto = millis();
         changeFsmState(ESTADO_CICLO);
@@ -161,6 +162,12 @@ void loop()
     {
       if (millis() - timer_saida >= atrasoSaida)
       {
+        contador++;
+        Serial.print("contador: "); Serial.print(contador);
+        Serial.print("  tempo fechamento: "); Serial.print(millis() - timer_fechamento); Serial.print("ms");
+        Serial.print("   prod/min: ");
+        Serial.println((float)60 * 1000 / (millis() - timer_ppm));
+        timer_ppm = millis();
         if (flag_stop)
         {
           desligaEsteira();

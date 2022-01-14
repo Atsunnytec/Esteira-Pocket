@@ -35,6 +35,8 @@ uint16_t fsm_substate = fase1;
 bool flag_debugEnabled = true;
 bool flag_bloqueio = false;
 uint32_t timer_atrasoProduto = 0;
+uint32_t timer_ppm = 0;
+uint32_t timer_fechamento = 0;
 
 // objetos
 extendedIOs extIOs = extendedIOs(PIN_IO_CLOCK, PIN_IO_LATCH, PIN_INPUT_DATA, PIN_OUTPUT_DATA);
@@ -43,9 +45,6 @@ checkSensorPulse SP = checkSensorPulse(PIN_SP);
 checkSensorPulse START = checkSensorPulse(PIN_START);
 checkSensorPulse STOP = checkSensorPulse(PIN_STOP);
 motorPWM esteira = motorPWM(PIN_MOTOR);
-
-uint32_t ppr = 2000;
-uint32_t diametro = 60;
 
 uint32_t contador = 0;
 
