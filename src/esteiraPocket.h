@@ -50,11 +50,11 @@ uint32_t contador = 0;
 
 // parametros:
 int32_t velocidade = 70;     // 0 - 100 % // to do:
-int32_t rampa = 1200;         // ms
+int32_t rampa = 100;         // ms
 int32_t atrasoProduto = 1700; //ms
-int32_t atrasoSaida = 1700;   // ms
-int32_t duracaoPistao = 1700; //ms
 int32_t atrasoPistao = 1700;  //ms
+int32_t duracaoPistao = 1700; //ms
+int32_t atrasoSaida = 1700;   // ms
 
 // prototypes:
 void desligaTodosOutputs();
@@ -79,12 +79,12 @@ void incrementaContadores()
 
 void acionaPistao()
 {
-  digitalWrite(PIN_PISTAO, HIGH);
+  digitalWrite(PIN_PISTAO, LOW);
 }
 
 void desacionaPistao()
 {
-  digitalWrite(PIN_PISTAO, LOW);
+  digitalWrite(PIN_PISTAO, HIGH);
 }
 
 void ligaEsteira()

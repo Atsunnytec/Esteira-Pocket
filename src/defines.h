@@ -10,8 +10,6 @@
 #define PIN_PISTAO PIN_DO1
 #define PIN_MOTOR PIN_HSDO1
 
-// outros:
-#define LIMITE_DE_PRODUTOS_NA_LINHA 4
 
 
 #endif

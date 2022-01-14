@@ -8,10 +8,11 @@ void setup()
   pinInitialization();
   extIOs.init();
   desligaTodosOutputs();
-  delay(1000);
-
+  desacionaPistao();
   esteira.setup(velocidade, rampa);
   desligaEsteira();
+  delay(1000);
+
 
   eventQueue = xQueueCreate(2, sizeof(Evento));
 
