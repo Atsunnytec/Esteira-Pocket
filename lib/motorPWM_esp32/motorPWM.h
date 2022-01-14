@@ -25,8 +25,18 @@ public:
         setMaxSpeed(maxSpeed);
         setRampa(rampa);
 
-        ledcAttachPin(_pin_Rpwm, pwmChannel); //Atribuímos o pino 2 ao canal 0.
-        ledcSetup(pwmChannel, pwmFrequency, pwmResolution);     //Atribuímos ao canal 0 a frequencia de 1000Hz com resolucao de 10bits.
+        ledcAttachPin(_pin_Rpwm, pwmChannel);               //Atribuímos o pino 2 ao canal 0.
+        ledcSetup(pwmChannel, pwmFrequency, pwmResolution); //Atribuímos ao canal 0 a frequencia de 1000Hz com resolucao de 10bits.
+        calculaLimiteDaVelocidadeEmBits();
+        ledcWrite(pwmChannel, _limiteDaVelocidadeEmBits);
+    }
+
+    void calculaLimiteDaVelocidadeEmBits()
+    {
+        _limiteDaVelocidadeEmBits = 1;
+        for (int i = 0; i < pwmResolution; i++)
+            _limiteDaVelocidadeEmBits *= 2;
+        Serial.print("lim bits: "); Serial.println(_limiteDaVelocidadeEmBits);
     }
 
     void setRampa(long rampaEmMilissegundos)
@@ -53,9 +63,9 @@ public:
     {
         if (calculaVelocidade())
         {
-            int32_t v = map(_velocidade/100, 0, 255, 1024, 0);
+            int32_t v = map(_velocidade / 100, 0, 255, _limiteDaVelocidadeEmBits, 0);
             ledcWrite(pwmChannel, v);
-            Serial.println (v);
+            Serial.println(v);
         }
     }
 
@@ -76,7 +86,7 @@ public:
 
     void aceleraEsteira()
     {
-        while(_velocidade < _velocidade_max/100)
+        while (_velocidade < _velocidade_max / 100)
         {
             _velocidade += dV;
             ledcWrite(pwmChannel, _velocidade);
@@ -92,7 +102,7 @@ private:
 
     const int16_t pwmChannel = 2;
     const int32_t pwmFrequency = 2500;
-    const int16_t pwmResolution = 10;
+    const int16_t pwmResolution = 9;
     int16_t porcento = 50;
 
     const int16_t tamanhoUmByte = 255;
@@ -104,7 +114,8 @@ private:
     long _pos = 0;
     long _velocidade = 0;  // bits/100
     long _aceleracao = 25; //bits/100ms  Ex: acel = 25 =>>> 0.025%/ms
-    unsigned int dt = 2;   //milissegundos ; período de atualização da velocidade
+    long _limiteDaVelocidadeEmBits = 512;
+    unsigned int dt = 2; //milissegundos ; período de atualização da velocidade
     unsigned int dV = dt * _aceleracao;
     long _rampa = 1000;
 

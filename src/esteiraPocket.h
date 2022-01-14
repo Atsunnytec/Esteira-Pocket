@@ -95,10 +95,10 @@ void desacionaPistao()
 
 void ligaEsteira()
 {
-  esteira.aceleraEsteira();
+  esteira.run();
 }
 
-void pararEsteira()
+void desligaEsteira()
 {
   esteira.stop();
 }
