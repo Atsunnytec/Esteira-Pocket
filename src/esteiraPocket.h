@@ -95,12 +95,17 @@ void desacionaPistao()
 
 void ligaEsteira()
 {
-  esteira.run();
+  esteira.aceleraEsteira();
 }
 
-void desligaEsteira()
+void pararEsteira()
 {
   esteira.stop();
+}
+
+void paradaEmergenciaEsteira()
+{
+ // to do:
 }
 
 void changeFsmState(Estado estado)

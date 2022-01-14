@@ -76,9 +76,10 @@ public:
 
     void aceleraEsteira()
     {
-        while(_velocidade < _velocidade_max)
+        while(_velocidade < _velocidade_max/100)
         {
             _velocidade += dV;
+            ledcWrite(pwmChannel, _velocidade);
             delay(dt);
         }
     }
