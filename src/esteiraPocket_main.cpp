@@ -96,7 +96,7 @@ void loop()
     }
     else if (fsm_substate == fase2)
     {
-      if (SP.check())
+      if (SP.check(true))
       {
         timer_fechamento = millis();
         Serial.println("produto detectado.");
