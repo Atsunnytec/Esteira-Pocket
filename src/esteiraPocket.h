@@ -49,12 +49,12 @@ motorPWM esteira = motorPWM(PIN_MOTOR);
 uint32_t contador = 0;
 
 // parametros:
-int32_t velocidade = 90;     // 0 - 100 % // to do:
-int32_t rampa = 100;         // ms
-int32_t atrasoProduto = 120; //ms
-int32_t atrasoPistao = 200;  //ms
-int32_t duracaoPistao = 500; //ms
-int32_t atrasoSaida = 100;   // ms
+int32_t velocidade = 95;     // 0 - 100 % // to do:
+int32_t rampa = 50;         // ms
+int32_t atrasoProduto = 210; //ms
+int32_t atrasoPistao = 5;  //ms
+int32_t duracaoPistao = 400; //ms
+int32_t atrasoSaida = 50;   // ms
 
 // prototypes:
 void desligaTodosOutputs();

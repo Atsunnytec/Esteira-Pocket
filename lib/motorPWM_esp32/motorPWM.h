@@ -56,6 +56,8 @@ public:
         // converte velocidade para 8bits: 0 a 255
         int temp = constrain(max, 0, cemPorCento);
         _velocidade_max = round((temp * (float)tamanhoUmByte * aumentaResolucao) / cemPorCento);
+        Serial.print("velo max: ");
+        Serial.println(_velocidade_max);
         setRampa(_rampa);
     }
 
