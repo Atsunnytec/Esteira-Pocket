@@ -113,6 +113,7 @@ void loop()
     static uint32_t timer_saida = 0;
     static uint32_t timer_duracaoPistao = 0;
     static bool flag_stop = false;
+    static uint32_t timer_novoProduto = 0;
 
     if (evento == EVT_PARADA_EMERGENCIA)
     {
@@ -162,6 +163,16 @@ void loop()
     else if (fsm_substate == fase4)
     {
       if (millis() - timer_saida >= atrasoSaida)
+      {
+        Serial.println("Entrou Atraso Saida");
+        ligaEsteira();
+        fsm_substate = fase5;
+        timer_novoProduto = millis();
+      }
+    }
+    else if (fsm_substate == fase5)
+    {
+      if (millis() - timer_novoProduto >= atrasoNovoProduto)
       {
         contador++;
         Serial.print("contador: "); Serial.print(contador);

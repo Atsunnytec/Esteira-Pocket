@@ -38,6 +38,7 @@ uint32_t timer_atrasoProduto = 0;
 uint32_t timer_ppm = 0;
 uint32_t timer_fechamento = 0;
 
+
 // objetos
 extendedIOs extIOs = extendedIOs(PIN_IO_CLOCK, PIN_IO_LATCH, PIN_INPUT_DATA, PIN_OUTPUT_DATA);
 QueueHandle_t eventQueue;
@@ -55,6 +56,7 @@ int32_t atrasoProduto = 210; //ms
 int32_t atrasoPistao = 5;  //ms
 int32_t duracaoPistao = 400; //ms
 int32_t atrasoSaida = 50;   // ms
+int32_t atrasoNovoProduto = 50; //ms
 
 // prototypes:
 void desligaTodosOutputs();
