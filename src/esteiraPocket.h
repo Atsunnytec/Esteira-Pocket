@@ -6,6 +6,7 @@
 #include <extendedIOs.h>
 #include <esp32Industrial_v2.1.h>
 #include <checkSensorPulse.h>
+#include <ihmSunnytecMaster_v2.0.h>
 #include <motorPWM.h>
 #include "defines.h"
 
