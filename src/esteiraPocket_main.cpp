@@ -72,7 +72,7 @@ void loop()
       break;
     }
 
-    if (START.check())
+    if (evento == EVT_HOLD_PLAY_PAUSE)
     {
       if (flag_manutencao == true)
       {
@@ -96,7 +96,7 @@ void loop()
       break;
     }
 
-    if (STOP.check(true))
+    if (evento == EVT_PLAY_PAUSE)
     {
       desligaEsteira();
       changeFsmState(ESTADO_EMERGENCIA);
@@ -139,7 +139,7 @@ void loop()
       break;
     }
 
-    if (STOP.check(true))
+    if (evento == EVT_PLAY_PAUSE)
     {
       flag_stop = true;
       Serial.println("STOP");
