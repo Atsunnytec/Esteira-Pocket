@@ -39,6 +39,7 @@ void loop()
 
     if (fsm_substate == fase1)
     {
+      habilitaConfiguracaoPelaIhm();
       timer_emergencia = millis();
       fsm_substate = fase2;
     }
@@ -72,6 +73,7 @@ void loop()
       {
         bloqueiaMenusDeManutencao();
       }
+      desabilitaConfiguracaoPelaIhm();
       Serial.println("EM FUNCIONAMENTO");
       changeFsmState(ESTADO_EM_FUNCIONAMENTO);
     }
@@ -194,6 +196,7 @@ void loop()
         {
           desligaEsteira();
           desacionaPistao();
+          habilitaConfiguracaoPelaIhm();
           changeFsmState(ESTADO_STOP);
         }
         else
