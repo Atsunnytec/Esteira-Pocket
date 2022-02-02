@@ -34,6 +34,8 @@ uint16_t fsm_substate = fase1;
 
 // variaveis:
 bool configuracaoPelaIhm = true;
+int16_t quantidadeDeMenusDeManutencao = 0;
+bool flag_manutencao = false;
 bool flag_debugEnabled = true;
 bool flag_bloqueio = false;
 uint32_t timer_atrasoProduto = 0;
@@ -65,10 +67,15 @@ int32_t atrasoNovoProduto = 50; //ms
 
 // menus
 Menu menu_contador = Menu("Contador", READONLY, &contador, " ");
-Menu menu_atrasoProduto = Menu("Atraso Produto", PARAMETRO, &atrasoProduto, "ms", 50u, 0u, 5000);
-Menu menu_duracaoPistao = Menu("Duracao Pistao", PARAMETRO, &duracaoPistao, "ms", 50u, 0u, 5000);
+Menu menu_atrasoProduto = Menu("Atraso Produto", PARAMETRO, &atrasoProduto, "ms", 1u, 0u, 5000);
+Menu menu_duracaoPistao = Menu("Duracao Pistao", PARAMETRO, &duracaoPistao, "ms", 10u, 0u, 5000);
 // menus de manutencao
 Menu menu_velocidade = Menu("Velocidade", PARAMETRO, &velocidade, "%", 1u, 10u, 100);
+Menu menu_rampa = Menu("Rampa", PARAMETRO, &rampa, "ms", 1u, 10u, 100);
+Menu menu_atrasoPistao = Menu("Atraso Pistao", PARAMETRO, &atrasoPistao, "ms", 1u, 10u, 100);
+Menu menu_atrasoSaida = Menu("Atraso Saida", PARAMETRO, &atrasoSaida, "ms", 1u, 10u, 100);
+Menu menu_atrasoNovoProduto = Menu("Atraso Novo Produto", PARAMETRO, &atrasoNovoProduto, " ", 1u, 10u, 100);
+Menu menu_contadorAbsoluto = Menu("Contador Total", READONLY, &contadorAbsoluto, " ");
 
 // prototypes:
 void desligaTodosOutputs();
@@ -88,6 +95,27 @@ void colocaNovoGarrafaoNaFila();
 void liberaMenusDaIhm();
 
 // functions:
+void liberaMenusDeManutencao()
+{
+    quantidadeDeMenusDeManutencao = 6;
+
+    ihm.addMenuToIndex(&menu_atrasoPistao);
+    ihm.addMenuToIndex(&menu_atrasoNovoProduto);
+    ihm.addMenuToIndex(&menu_atrasoSaida);
+    ihm.addMenuToIndex(&menu_rampa);
+    ihm.addMenuToIndex(&menu_velocidade);
+    ihm.addMenuToIndex(&menu_contadorAbsoluto);
+}
+
+void bloqueiaMenusDeManutencao()
+{
+    for (int i = 0; i < quantidadeDeMenusDeManutencao; i++)
+    {
+        ihm.removeMenuFromIndex();
+    }
+    ihm.goToMenu(&menu_contador);
+    flag_manutencao = false;
+}
 
 void incrementaContadores()
 {
@@ -262,13 +290,13 @@ void t_botoesIhm(void *p)
       {
         Serial.println("HOLD DIREITA E ESQUERDA");
 
-        // if (flag_manutencao == false)
-        // {
-        //   liberaMenusDeManutencao();
-        //   // ihm.goToMenu(&menu_contadorAbsoluto);
-        //   ihm.showStatus2msg("MANUTENCAO LIBERADA");
-        //   flag_manutencao = true;
-        // }
+        if (flag_manutencao == false)
+        {
+          liberaMenusDeManutencao();
+          ihm.goToMenu(&menu_atrasoPistao);
+          ihm.showStatus2msg("MANUTENCAO LIBERADA");
+          flag_manutencao = true;
+        }
       }
     }
     else

@@ -68,6 +68,10 @@ void loop()
 
     if (START.check())
     {
+      if (flag_manutencao == true)
+      {
+        bloqueiaMenusDeManutencao();
+      }
       Serial.println("EM FUNCIONAMENTO");
       changeFsmState(ESTADO_EM_FUNCIONAMENTO);
     }
@@ -177,6 +181,7 @@ void loop()
       if (millis() - timer_novoProduto >= atrasoNovoProduto)
       {
         contador++;
+        // to do: incrementa contadores.
         Serial.print("contador: ");
         Serial.print(contador);
         Serial.print("  tempo fechamento: ");
