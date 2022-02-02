@@ -8,6 +8,7 @@
 #include <checkSensorPulse.h>
 #include <ihmSunnytecMaster_v2.0.h>
 #include <motorPWM.h>
+#include <EEPROM.h>
 #include "defines.h"
 
 enum Evento
@@ -68,13 +69,13 @@ int32_t atrasoNovoProduto = 50; //ms
 // menus
 Menu menu_contador = Menu("Contador", READONLY, &contador, " ");
 Menu menu_atrasoProduto = Menu("Atraso Produto", PARAMETRO, &atrasoProduto, "ms", 1u, 0u, 5000);
-Menu menu_duracaoPistao = Menu("Duracao Pistao", PARAMETRO, &duracaoPistao, "ms", 10u, 0u, 5000);
+Menu menu_duracaoPistao = Menu("Duracao Pistao", PARAMETRO, &duracaoPistao, "ms", 1u, 0u, 5000);
 // menus de manutencao
 Menu menu_velocidade = Menu("Velocidade", PARAMETRO, &velocidade, "%", 1u, 10u, 100);
-Menu menu_rampa = Menu("Rampa", PARAMETRO, &rampa, "ms", 1u, 10u, 100);
-Menu menu_atrasoPistao = Menu("Atraso Pistao", PARAMETRO, &atrasoPistao, "ms", 1u, 10u, 100);
-Menu menu_atrasoSaida = Menu("Atraso Saida", PARAMETRO, &atrasoSaida, "ms", 1u, 10u, 100);
-Menu menu_atrasoNovoProduto = Menu("Atraso Novo Produto", PARAMETRO, &atrasoNovoProduto, " ", 1u, 10u, 100);
+Menu menu_rampa = Menu("Rampa", PARAMETRO, &rampa, "ms", 1u, 10u, 1000);
+Menu menu_atrasoPistao = Menu("Atraso Pistao", PARAMETRO, &atrasoPistao, "ms", 1u, 1u, 2000);
+Menu menu_atrasoSaida = Menu("Atraso Saida", PARAMETRO, &atrasoSaida, "ms", 1u, 1u, 2000);
+Menu menu_atrasoNovoProduto = Menu("Atraso Novo Produto", PARAMETRO, &atrasoNovoProduto, " ", 1u, 1u, 2000);
 Menu menu_contadorAbsoluto = Menu("Contador Total", READONLY, &contadorAbsoluto, " ");
 
 // prototypes:
@@ -94,7 +95,61 @@ void resetDosContadores();
 void colocaNovoGarrafaoNaFila();
 void liberaMenusDaIhm();
 
+void saveParametersToEEPROM();
+void loadParametersFromEEPROM();
+void salvaContadorNaEEPROM();
+void t_eeprom(void *p);
+
 // functions:
+void saveParametersToEEPROM()
+{
+    EEPROM.put(EPR_rampa, rampa);
+    EEPROM.put(EPR_velocidade, velocidade);
+    EEPROM.put(EPR_atrasoProduto, atrasoProduto);
+    EEPROM.put(EPR_atrasoNovoProduto, atrasoNovoProduto);
+    EEPROM.put(EPR_atrasoPistao, atrasoPistao);
+    EEPROM.put(EPR_atrasoSaida, atrasoSaida);
+    EEPROM.put(EPR_duracaoPistao, duracaoPistao);
+    
+
+    salvaContadorNaEEPROM();
+
+    EEPROM.commit();
+}
+
+void loadParametersFromEEPROM()
+{
+    EEPROM.get(EPR_rampa, rampa);
+    EEPROM.get(EPR_velocidade, velocidade);
+    EEPROM.get(EPR_atrasoProduto, atrasoProduto);
+    EEPROM.get(EPR_atrasoNovoProduto, atrasoNovoProduto);
+    EEPROM.get(EPR_atrasoPistao, atrasoPistao);
+    EEPROM.get(EPR_atrasoSaida, atrasoSaida);
+    EEPROM.get(EPR_duracaoPistao, duracaoPistao);
+    EEPROM.get(EPR_contadorAbsoluto, contadorAbsoluto);
+}
+
+void salvaContadorNaEEPROM()
+{
+    const uint16_t intervaloEntreBackups = 100; // ciclos
+    if ((contadorAbsoluto % intervaloEntreBackups) == 0)
+    {
+        // Serial.print("save contador: ");Serial.println(contadorAbsoluto);
+        EEPROM.put(EPR_contadorAbsoluto, contadorAbsoluto);
+    }
+}
+
+void t_eeprom(void *p)
+{
+    int16_t intervaloDeBackups = 10000; //ms
+
+    while (1)
+    {
+        delay(intervaloDeBackups);
+        saveParametersToEEPROM();
+    }
+}
+
 void liberaMenusDeManutencao()
 {
     quantidadeDeMenusDeManutencao = 6;

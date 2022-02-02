@@ -13,6 +13,9 @@ void setup()
   desligaEsteira();
   delay(1000);
 
+  EEPROM.begin(EEPROM_SIZE);
+  loadParametersFromEEPROM();
+
   mutex_rs485 = xSemaphoreCreateMutex();
   eventQueue = xQueueCreate(2, sizeof(Evento));
 
@@ -24,6 +27,7 @@ void setup()
   xTaskCreatePinnedToCore(t_emergencia, "emergencia task", 1024, NULL, PRIORITY_2, NULL, CORE_0);
   xTaskCreatePinnedToCore(t_ihm, "ihm task", 4096, NULL, PRIORITY_3, NULL, CORE_0);
   xTaskCreatePinnedToCore(t_botoesIhm, "botoesIhm task", 4096, NULL, PRIORITY_3, NULL, CORE_0);
+  xTaskCreatePinnedToCore(t_eeprom, "eeprom task", 4096, NULL, PRIORITY_3, &h_eeprom, CORE_0);
 }
 
 void loop()
@@ -40,6 +44,7 @@ void loop()
     if (fsm_substate == fase1)
     {
       habilitaConfiguracaoPelaIhm();
+      vTaskResume(h_eeprom);
       timer_emergencia = millis();
       fsm_substate = fase2;
     }
@@ -74,6 +79,7 @@ void loop()
         bloqueiaMenusDeManutencao();
       }
       desabilitaConfiguracaoPelaIhm();
+      vTaskSuspend(h_eeprom);
       Serial.println("EM FUNCIONAMENTO");
       changeFsmState(ESTADO_EM_FUNCIONAMENTO);
     }
@@ -197,6 +203,7 @@ void loop()
           desligaEsteira();
           desacionaPistao();
           habilitaConfiguracaoPelaIhm();
+          vTaskResume(h_eeprom);
           changeFsmState(ESTADO_STOP);
         }
         else
