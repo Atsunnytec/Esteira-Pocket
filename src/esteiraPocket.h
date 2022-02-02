@@ -103,78 +103,78 @@ void t_eeprom(void *p);
 // functions:
 void saveParametersToEEPROM()
 {
-    EEPROM.put(EPR_rampa, rampa);
-    EEPROM.put(EPR_velocidade, velocidade);
-    EEPROM.put(EPR_atrasoProduto, atrasoProduto);
-    EEPROM.put(EPR_atrasoNovoProduto, atrasoNovoProduto);
-    EEPROM.put(EPR_atrasoPistao, atrasoPistao);
-    EEPROM.put(EPR_atrasoSaida, atrasoSaida);
-    EEPROM.put(EPR_duracaoPistao, duracaoPistao);
-    
+  EEPROM.put(EPR_rampa, rampa);
+  EEPROM.put(EPR_velocidade, velocidade);
+  EEPROM.put(EPR_atrasoProduto, atrasoProduto);
+  EEPROM.put(EPR_atrasoNovoProduto, atrasoNovoProduto);
+  EEPROM.put(EPR_atrasoPistao, atrasoPistao);
+  EEPROM.put(EPR_atrasoSaida, atrasoSaida);
+  EEPROM.put(EPR_duracaoPistao, duracaoPistao);
 
-    salvaContadorNaEEPROM();
+  salvaContadorNaEEPROM();
 
-    EEPROM.commit();
+  EEPROM.commit();
 }
 
 void loadParametersFromEEPROM()
 {
-    EEPROM.get(EPR_rampa, rampa);
-    EEPROM.get(EPR_velocidade, velocidade);
-    EEPROM.get(EPR_atrasoProduto, atrasoProduto);
-    EEPROM.get(EPR_atrasoNovoProduto, atrasoNovoProduto);
-    EEPROM.get(EPR_atrasoPistao, atrasoPistao);
-    EEPROM.get(EPR_atrasoSaida, atrasoSaida);
-    EEPROM.get(EPR_duracaoPistao, duracaoPistao);
-    EEPROM.get(EPR_contadorAbsoluto, contadorAbsoluto);
+  EEPROM.get(EPR_rampa, rampa);
+  EEPROM.get(EPR_velocidade, velocidade);
+  EEPROM.get(EPR_atrasoProduto, atrasoProduto);
+  EEPROM.get(EPR_atrasoNovoProduto, atrasoNovoProduto);
+  EEPROM.get(EPR_atrasoPistao, atrasoPistao);
+  EEPROM.get(EPR_atrasoSaida, atrasoSaida);
+  EEPROM.get(EPR_duracaoPistao, duracaoPistao);
+  EEPROM.get(EPR_contadorAbsoluto, contadorAbsoluto);
 }
 
 void salvaContadorNaEEPROM()
 {
-    const uint16_t intervaloEntreBackups = 100; // ciclos
-    if ((contadorAbsoluto % intervaloEntreBackups) == 0)
-    {
-        // Serial.print("save contador: ");Serial.println(contadorAbsoluto);
-        EEPROM.put(EPR_contadorAbsoluto, contadorAbsoluto);
-    }
+  const uint16_t intervaloEntreBackups = 100; // ciclos
+  if ((contadorAbsoluto % intervaloEntreBackups) == 0)
+  {
+    // Serial.print("save contador: ");Serial.println(contadorAbsoluto);
+    EEPROM.put(EPR_contadorAbsoluto, contadorAbsoluto);
+  }
 }
 
 void t_eeprom(void *p)
 {
-    int16_t intervaloDeBackups = 10000; //ms
+  int16_t intervaloDeBackups = 10000; //ms
 
-    while (1)
-    {
-        delay(intervaloDeBackups);
-        saveParametersToEEPROM();
-    }
+  while (1)
+  {
+    delay(intervaloDeBackups);
+    saveParametersToEEPROM();
+  }
 }
 
 void liberaMenusDeManutencao()
 {
-    quantidadeDeMenusDeManutencao = 6;
+  quantidadeDeMenusDeManutencao = 6;
 
-    ihm.addMenuToIndex(&menu_atrasoPistao);
-    ihm.addMenuToIndex(&menu_atrasoNovoProduto);
-    ihm.addMenuToIndex(&menu_atrasoSaida);
-    ihm.addMenuToIndex(&menu_rampa);
-    ihm.addMenuToIndex(&menu_velocidade);
-    ihm.addMenuToIndex(&menu_contadorAbsoluto);
+  ihm.addMenuToIndex(&menu_atrasoPistao);
+  ihm.addMenuToIndex(&menu_atrasoNovoProduto);
+  ihm.addMenuToIndex(&menu_atrasoSaida);
+  ihm.addMenuToIndex(&menu_rampa);
+  ihm.addMenuToIndex(&menu_velocidade);
+  ihm.addMenuToIndex(&menu_contadorAbsoluto);
 }
 
 void bloqueiaMenusDeManutencao()
 {
-    for (int i = 0; i < quantidadeDeMenusDeManutencao; i++)
-    {
-        ihm.removeMenuFromIndex();
-    }
-    ihm.goToMenu(&menu_contador);
-    flag_manutencao = false;
+  for (int i = 0; i < quantidadeDeMenusDeManutencao; i++)
+  {
+    ihm.removeMenuFromIndex();
+  }
+  flag_manutencao = false;
 }
 
 void incrementaContadores()
 {
   contador++;
+  contadorAbsoluto++;
+  salvaContadorNaEEPROM();
 }
 
 void acionaPistao()

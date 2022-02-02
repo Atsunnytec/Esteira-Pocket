@@ -80,6 +80,7 @@ void loop()
       }
       desabilitaConfiguracaoPelaIhm();
       vTaskSuspend(h_eeprom);
+      ihm.goToMenu(&menu_contador);
       Serial.println("EM FUNCIONAMENTO");
       changeFsmState(ESTADO_EM_FUNCIONAMENTO);
     }
@@ -188,8 +189,7 @@ void loop()
     {
       if (millis() - timer_novoProduto >= atrasoNovoProduto)
       {
-        contador++;
-        // to do: incrementa contadores.
+        incrementaContadores();
         Serial.print("contador: ");
         Serial.print(contador);
         Serial.print("  tempo fechamento: ");
