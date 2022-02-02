@@ -13,7 +13,7 @@ void setup()
   desligaEsteira();
   delay(1000);
 
-
+  mutex_rs485 = xSemaphoreCreateMutex();
   eventQueue = xQueueCreate(2, sizeof(Evento));
 
   if (flag_debugEnabled)
@@ -22,6 +22,8 @@ void setup()
   }
   xTaskCreatePinnedToCore(t_blink, "blink task", 1024, NULL, PRIORITY_1, NULL, CORE_0);
   xTaskCreatePinnedToCore(t_emergencia, "emergencia task", 1024, NULL, PRIORITY_2, NULL, CORE_0);
+  xTaskCreatePinnedToCore(t_ihm, "ihm task", 4096, NULL, PRIORITY_3, NULL, CORE_0);
+  xTaskCreatePinnedToCore(t_botoesIhm, "botoesIhm task", 4096, NULL, PRIORITY_3, NULL, CORE_0);
 }
 
 void loop()
@@ -175,8 +177,11 @@ void loop()
       if (millis() - timer_novoProduto >= atrasoNovoProduto)
       {
         contador++;
-        Serial.print("contador: "); Serial.print(contador);
-        Serial.print("  tempo fechamento: "); Serial.print(millis() - timer_fechamento); Serial.print("ms");
+        Serial.print("contador: ");
+        Serial.print(contador);
+        Serial.print("  tempo fechamento: ");
+        Serial.print(millis() - timer_fechamento);
+        Serial.print("ms");
         Serial.print("   prod/min: ");
         Serial.println((float)60 * 1000 / (millis() - timer_ppm));
         timer_ppm = millis();
