@@ -55,6 +55,7 @@ checkSensorPulse STOP = checkSensorPulse(PIN_STOP);
 motorPWM esteira = motorPWM(PIN_MOTOR);
 
 // parametros:
+int32_t produto = 0;
 int32_t contador = 0;
 int32_t atrasoProduto = 210; //ms
 int32_t duracaoPistao = 400; //ms
@@ -67,9 +68,10 @@ int32_t atrasoSaida = 50;       // ms
 int32_t atrasoNovoProduto = 50; //ms
 
 // menus
+Menu menu_produto = Menu("Produto", PARAMETRO, &produto, " ", 1u, 0u, (unsigned)(EPR_maxProdutos - 1));
 Menu menu_contador = Menu("Contador", READONLY, &contador, " ");
-Menu menu_atrasoProduto = Menu("Atraso Produto", PARAMETRO, &atrasoProduto, "ms", 1u, 0u, 5000);
-Menu menu_duracaoPistao = Menu("Duracao Pistao", PARAMETRO, &duracaoPistao, "ms", 1u, 0u, 5000);
+Menu menu_atrasoProduto = Menu("Atraso Produto", PARAMETRO, &atrasoProduto, "ms", 1u, 0u, 5000, &produto);
+Menu menu_duracaoPistao = Menu("Duracao Pistao", PARAMETRO, &duracaoPistao, "ms", 1u, 0u, 5000, &produto);
 // menus de manutencao
 Menu menu_velocidade = Menu("Velocidade", PARAMETRO, &velocidade, "%", 1u, 10u, 100);
 Menu menu_rampa = Menu("Rampa", PARAMETRO, &rampa, "ms", 1u, 10u, 1000);
@@ -99,10 +101,14 @@ void saveParametersToEEPROM();
 void loadParametersFromEEPROM();
 void salvaContadorNaEEPROM();
 void t_eeprom(void *p);
+void presetEEPROM();
+void loadProdutoFromEEPROM();
+void saveProdutoToEEPROM(int32_t _produto);
 
 // functions:
 void saveParametersToEEPROM()
 {
+  EEPROM.put(EPR_produto, produto);
   EEPROM.put(EPR_rampa, rampa);
   EEPROM.put(EPR_velocidade, velocidade);
   EEPROM.put(EPR_atrasoProduto, atrasoProduto);
@@ -110,8 +116,9 @@ void saveParametersToEEPROM()
   EEPROM.put(EPR_atrasoPistao, atrasoPistao);
   EEPROM.put(EPR_atrasoSaida, atrasoSaida);
   EEPROM.put(EPR_duracaoPistao, duracaoPistao);
-
   salvaContadorNaEEPROM();
+
+  saveProdutoToEEPROM(produto);
 
   EEPROM.commit();
 }
@@ -126,6 +133,29 @@ void loadParametersFromEEPROM()
   EEPROM.get(EPR_atrasoSaida, atrasoSaida);
   EEPROM.get(EPR_duracaoPistao, duracaoPistao);
   EEPROM.get(EPR_contadorAbsoluto, contadorAbsoluto);
+  
+  EEPROM.get(EPR_produto, produto);
+  loadProdutoFromEEPROM();
+}
+
+void loadProdutoFromEEPROM()
+{
+    EEPROM.get(EPR_inicioProdutos + produto * EPR_sizeParameters + sizeof(atrasoProduto) * EPR_atrasoProduto, atrasoProduto);
+    EEPROM.get(EPR_inicioProdutos + produto * EPR_sizeParameters + sizeof(duracaoPistao) * EPR_duracaoPistao, duracaoPistao);
+}
+
+void saveProdutoToEEPROM(int32_t _produto)
+{
+    EEPROM.put(EPR_inicioProdutos + _produto * EPR_sizeParameters + sizeof(atrasoProduto) * EPR_atrasoProduto, atrasoProduto);
+    EEPROM.put(EPR_inicioProdutos + _produto * EPR_sizeParameters + sizeof(duracaoPistao) * EPR_duracaoPistao, duracaoPistao);
+}
+
+void presetEEPROM()
+{
+    for (int i = 0; i < EPR_maxProdutos; i++)
+    {
+        saveProdutoToEEPROM(i);
+    }
 }
 
 void salvaContadorNaEEPROM()
@@ -298,7 +328,12 @@ void t_botoesIhm(void *p)
         ihm.incrementaParametroAtual();
 
         Menu *checkMenu = ihm.getMenu();
-        if (checkMenu == &menu_contador)
+        if (checkMenu == &menu_produto)
+        {
+          // saveProdutoToEEPROM(produto); // to do: salvar produto na eeprom antes de trocar. Tem que ser feito antes de incrementar a variavel
+          loadProdutoFromEEPROM();
+        }
+        else if (checkMenu == &menu_contador)
         {
           contador = 0;
         }
@@ -315,7 +350,12 @@ void t_botoesIhm(void *p)
         ihm.decrementaParametroAtual();
 
         Menu *checkMenu = ihm.getMenu();
-        if (checkMenu == &menu_contador)
+        if (checkMenu == &menu_produto)
+        {
+          // saveProdutoToEEPROM(produto); // to do: salvar produto na eeprom antes de trocar. Tem que ser feito antes de incrementar a variavel
+          loadProdutoFromEEPROM();
+        }
+        else if (checkMenu == &menu_contador)
         {
           contador = 0;
         }
@@ -375,6 +415,7 @@ void desabilitaConfiguracaoPelaIhm()
 void liberaMenusDaIhm()
 {
   ihm.addMenuToIndex(&menu_contador);
+  ihm.addMenuToIndex(&menu_produto);
   ihm.addMenuToIndex(&menu_atrasoProduto);
   ihm.addMenuToIndex(&menu_duracaoPistao);
 }

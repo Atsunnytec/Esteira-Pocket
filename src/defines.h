@@ -5,14 +5,19 @@
 #define EEPROM_SIZE 512
 
 #define EPR_contadorAbsoluto 0
-#define EPR_atrasoProduto 4
-#define EPR_duracaoPistao 8
+#define EPR_produto 4
+#define EPR_atrasoNovoProduto 8
+#define EPR_velocidade 12
+#define EPR_atrasoSaida 16
+#define EPR_atrasoPistao 20
+#define EPR_rampa 24
 
-#define EPR_atrasoNovoProduto 12
-#define EPR_velocidade 16
-#define EPR_atrasoSaida 20
-#define EPR_atrasoPistao 24
-#define EPR_rampa 28
+#define EPR_atrasoProduto 0
+#define EPR_duracaoPistao 1
+
+#define EPR_maxProdutos 12
+#define EPR_inicioProdutos 60
+#define EPR_sizeParameters 8
 
 // IO's:
 #define PIN_SP PIN_HSDI1  // sensor de produto

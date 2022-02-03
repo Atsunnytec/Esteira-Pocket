@@ -15,6 +15,7 @@ void setup()
 
   EEPROM.begin(EEPROM_SIZE);
   loadParametersFromEEPROM();
+  // presetEEPROM();
 
   mutex_rs485 = xSemaphoreCreateMutex();
   eventQueue = xQueueCreate(2, sizeof(Evento));
