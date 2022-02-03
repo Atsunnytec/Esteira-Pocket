@@ -25,9 +25,10 @@ void setup()
   }
   xTaskCreatePinnedToCore(t_blink, "blink task", 1024, NULL, PRIORITY_1, NULL, CORE_0);
   xTaskCreatePinnedToCore(t_emergencia, "emergencia task", 1024, NULL, PRIORITY_2, NULL, CORE_0);
-  xTaskCreatePinnedToCore(t_ihm, "ihm task", 4096, NULL, PRIORITY_3, NULL, CORE_0);
+  xTaskCreatePinnedToCore(t_ihm, "ihm task", 4096, NULL, PRIORITY_4, NULL, CORE_0);
   xTaskCreatePinnedToCore(t_botoesIhm, "botoesIhm task", 4096, NULL, PRIORITY_3, NULL, CORE_0);
-  xTaskCreatePinnedToCore(t_eeprom, "eeprom task", 4096, NULL, PRIORITY_3, &h_eeprom, CORE_0);
+  xTaskCreatePinnedToCore(t_eeprom, "eeprom task", 4096, NULL, PRIORITY_2, &h_eeprom, CORE_0);
+  delay(1000);
 }
 
 void loop()
@@ -44,8 +45,8 @@ void loop()
     if (fsm_substate == fase1)
     {
       ihm.showStatus2msg("EMERGENCIA");
-      // ihm.desligaLEDverde();
-      // ihm.ligaLEDvermelho();
+      ihm.desligaLEDverde();
+      ihm.ligaLEDvermelho();
       habilitaConfiguracaoPelaIhm();
       vTaskResume(h_eeprom);
       timer_emergencia = millis();
@@ -61,7 +62,7 @@ void loop()
       {
         Serial.println("STOP");
         ihm.showStatus2msg("STOP");
-        // ihm.desligaLEDvermelho();
+        ihm.desligaLEDvermelho();
         changeFsmState(ESTADO_STOP);
       }
     }
@@ -87,7 +88,7 @@ void loop()
       vTaskSuspend(h_eeprom);
       ihm.goToMenu(&menu_contador);
       Serial.println("EM FUNCIONAMENTO");
-      // ihm.ligaLEDverde();
+      ihm.ligaLEDverde();
       changeFsmState(ESTADO_EM_FUNCIONAMENTO);
     }
     break;
@@ -97,7 +98,7 @@ void loop()
     if (evento == EVT_PARADA_EMERGENCIA)
     {
       desligaEsteira();
-      // ihm.desligaLEDverde();
+      ihm.desligaLEDverde();
       changeFsmState(ESTADO_EMERGENCIA);
       Serial.println("EMERGENCIA");
       break;
@@ -107,7 +108,7 @@ void loop()
     {
       desligaEsteira();
       changeFsmState(ESTADO_EMERGENCIA);
-      // ihm.desligaLEDverde();
+      ihm.desligaLEDverde();
       Serial.println("STOP");
       break;
     }
@@ -143,7 +144,7 @@ void loop()
     {
       desligaEsteira();
       desacionaPistao();
-      // ihm.desligaLEDverde();
+      ihm.desligaLEDverde();
       changeFsmState(ESTADO_EMERGENCIA);
       Serial.println("EMERGENCIA");
       break;
@@ -215,7 +216,7 @@ void loop()
           habilitaConfiguracaoPelaIhm();
           vTaskResume(h_eeprom);
           ihm.showStatus2msg("STOP");
-          // ihm.desligaLEDverde();
+          ihm.desligaLEDverde();
           changeFsmState(ESTADO_STOP);
         }
         else
