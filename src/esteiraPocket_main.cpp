@@ -43,6 +43,9 @@ void loop()
 
     if (fsm_substate == fase1)
     {
+      ihm.showStatus2msg("EMERGENCIA");
+      // ihm.desligaLEDverde();
+      // ihm.ligaLEDvermelho();
       habilitaConfiguracaoPelaIhm();
       vTaskResume(h_eeprom);
       timer_emergencia = millis();
@@ -57,6 +60,8 @@ void loop()
       else if (millis() - timer_emergencia > timeout_emergencia)
       {
         Serial.println("STOP");
+        ihm.showStatus2msg("STOP");
+        // ihm.desligaLEDvermelho();
         changeFsmState(ESTADO_STOP);
       }
     }
@@ -82,6 +87,7 @@ void loop()
       vTaskSuspend(h_eeprom);
       ihm.goToMenu(&menu_contador);
       Serial.println("EM FUNCIONAMENTO");
+      // ihm.ligaLEDverde();
       changeFsmState(ESTADO_EM_FUNCIONAMENTO);
     }
     break;
@@ -91,6 +97,7 @@ void loop()
     if (evento == EVT_PARADA_EMERGENCIA)
     {
       desligaEsteira();
+      // ihm.desligaLEDverde();
       changeFsmState(ESTADO_EMERGENCIA);
       Serial.println("EMERGENCIA");
       break;
@@ -100,6 +107,7 @@ void loop()
     {
       desligaEsteira();
       changeFsmState(ESTADO_EMERGENCIA);
+      // ihm.desligaLEDverde();
       Serial.println("STOP");
       break;
     }
@@ -107,6 +115,7 @@ void loop()
     if (fsm_substate == fase1)
     {
       ligaEsteira();
+      ihm.showStatus2msg("EM FUNCIONAMENTO");
       fsm_substate = fase2;
     }
     else if (fsm_substate == fase2)
@@ -134,6 +143,7 @@ void loop()
     {
       desligaEsteira();
       desacionaPistao();
+      // ihm.desligaLEDverde();
       changeFsmState(ESTADO_EMERGENCIA);
       Serial.println("EMERGENCIA");
       break;
@@ -204,6 +214,8 @@ void loop()
           desacionaPistao();
           habilitaConfiguracaoPelaIhm();
           vTaskResume(h_eeprom);
+          ihm.showStatus2msg("STOP");
+          // ihm.desligaLEDverde();
           changeFsmState(ESTADO_STOP);
         }
         else
