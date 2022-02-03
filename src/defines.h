@@ -5,7 +5,7 @@
 #define EEPROM_SIZE 512
 
 #define EPR_contadorAbsoluto 0
-#define EPR_produto 4
+#define EPR_produto 508
 #define EPR_atrasoNovoProduto 8
 #define EPR_velocidade 12
 #define EPR_atrasoSaida 16

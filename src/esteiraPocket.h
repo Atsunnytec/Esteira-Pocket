@@ -108,7 +108,6 @@ void saveProdutoToEEPROM(int32_t _produto);
 // functions:
 void saveParametersToEEPROM()
 {
-  EEPROM.put(EPR_produto, produto);
   EEPROM.put(EPR_rampa, rampa);
   EEPROM.put(EPR_velocidade, velocidade);
   EEPROM.put(EPR_atrasoProduto, atrasoProduto);
@@ -118,6 +117,7 @@ void saveParametersToEEPROM()
   EEPROM.put(EPR_duracaoPistao, duracaoPistao);
   salvaContadorNaEEPROM();
 
+  EEPROM.put(EPR_produto, produto);
   saveProdutoToEEPROM(produto);
 
   EEPROM.commit();
@@ -133,7 +133,7 @@ void loadParametersFromEEPROM()
   EEPROM.get(EPR_atrasoSaida, atrasoSaida);
   EEPROM.get(EPR_duracaoPistao, duracaoPistao);
   EEPROM.get(EPR_contadorAbsoluto, contadorAbsoluto);
-  
+
   EEPROM.get(EPR_produto, produto);
   loadProdutoFromEEPROM();
 }
